@@ -1,7 +1,7 @@
 <?php
 //enqueue styles and scripts
-var_dump(plugins_url());
-wp_enqueue_style( 'seg-admin-page', plugins_url() . '/simple-excerpt-generator/admin/css/seg_admin.css', array(), filemtime( plugins_url() . '/simple-excerpt-generator/admin/css/seg_admin.css' ));
+
+wp_enqueue_style( 'seg-admin-page', plugins_url() . '/simple-excerpt-generator/admin/css/seg_admin.css');
 wp_enqueue_script('seg-admin-script',plugins_url() . '/simple-excerpt-generator/admin/js/seg_admin.js',array('jquery'));
 // collecting data for presets
 

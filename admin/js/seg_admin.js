@@ -212,7 +212,7 @@
 
               $.post(ajaxurl, data, function(response)
                           {
-                           console.log(response);
+
                           $(`#step${id}`).addClass('stepReady');
                            resolve(id);
                            iterationOffset+=id;

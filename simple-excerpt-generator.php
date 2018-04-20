@@ -51,7 +51,7 @@ function seg_generate_excerpts_handler() {
 
       foreach ($posts_query->posts as $post)
           {
-            $excerpt = wp_trim_words( $post->post_content, intval($excerptLength,10), $suffix );
+            $excerpt = wp_trim_words( strip_shortcodes($post->post_content ), intval($excerptLength,10), $suffix );
 
             $postToUpdate = array(
                                   'ID'           => $post->ID,
