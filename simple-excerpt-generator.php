@@ -17,11 +17,11 @@ function simple_excerpt_generator_admin_page()
 {
     add_menu_page(
         'Simple Excerpt Generator',
-        'SEG',
+        'Simple Excerpt',
         'manage_options',
         plugin_dir_path(__FILE__) . 'admin/views/admin-page.php',
         null,
-        plugin_dir_url(__FILE__) . 'excerpt.svg',
+        'dashicons-format-quote',
         20
     );
 }
