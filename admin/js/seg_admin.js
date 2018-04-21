@@ -1,71 +1,91 @@
-(function(s_except_gen) {
+(function(simpleExcerptGenerator) {
 
     // The global jQuery object is passed as a parameter
-    s_except_gen(window.jQuery, window, document);
+    simpleExcerptGenerator(window.jQuery, window, document);
 
   }(function($, window, document) {
-
     // The $ is now locally scoped
     let selectedCategories = [];
    // Listen for the jQuery ready event on the document
    $(function() {
-
      // The DOM is ready!
      // get categoty tree layout
+     //"categories" is variaple passet from php
         const available_categories = categoryTree(categories);
-
         // show category tree when click on category box
         $('.seg-categories').on('click', (event)=>{
+          //exclude click on category item inside the box
           if (event.target.id !=='includedCat')
           {
-
             $('#cat-source').length
               ?
                 $('#cat-source').off().remove()
               :
                 $(event.target).next().append(available_categories);
-                checkDisabledList();
-                $('#cat-source').on("click", "li" , (event)=>{
-                    addCategoryToList(
-                                      event.target,
-                                      getCategoryItemHTML(event.target.id,event.target.innerText),
-                                      event.target.id,
+
+            checkDisabledList();
+            //event listener for ckick on category in list (to add category to selected)
+            $('#cat-source').on("click", "li" , (event)=>{
+                addCategoryToList(
+                                  event.target,
+                                  getCategoryItemHTML(event.target.id,event.target.innerText),
+                                  event.target.id,
                                     );
-                    checkDisabledList();
-                    checkCategoriesSettings();
-                });
+
+                checkDisabledList();
+
+                checkCategoriesSettings();
+
+              });
           }
       });
           /**
-           * Event handler for generate button
-           *
+           * Event listener for generate button
            */
-          $('#seg-generate').on('click',()=>{
-            generateExcerpts();
-          });
+        $('#seg-generate').on('click', () => { generateExcerpts(); });
         // close category tree when click outside
         $('body').on('click',function (e) {
-
-          if ($("#cat-source").length ) {
-
-            if ( $(e.target).closest("#cat-source").length || $(e.target).closest('.seg-categories').length ) return;
+          //make sure that categogy tree is in DOM
+          if ($("#cat-source").length )
+            {
+              if (
+                    $(e.target).closest("#cat-source").length
+                  ||
+                    $(e.target).closest('.seg-categories').length )
+                  { return; }
 
                 $('#cat-source').off().remove()
-
               }
         });
-        // click event handler on selected category
-        $('#includedCat').live('click', (event)=>{
-                                                removeCategoryFromList(event.target);
-                                                addRemoveToFromDisabledList($(event.target).attr('catid'));
-                                                checkCategoriesSettings();
-                                              });
-      //settings change Event
+
+        // click event listener on selected category
+        $('#includedCat').live('click', (event)=>
+            {
+              removeCategoryFromList(event.target);
+              addRemoveToFromDisabledList($(event.target).attr('catid'));
+              checkCategoriesSettings();
+            });
+
+       //settings change Event listener
         $('.setting').on('change',()=>checkCategoriesSettings());
 
    });
-   //
-   //function set chosen categories settings to hidden input
+//_____________________END of DOM ready function__________________________________
+
+   // Helper functions
+
+   /**
+    * Set choosen categories to included or excluded categories hidden input.
+    * Gets all the children of
+    * div.include-categoty-settings
+    * and
+    * div.exclude-categoty-settings
+    * and set childern "catid" values  to
+    * input#include-categories
+    * and
+    * input#exclude-categories
+    * @return void
+    */
     function checkCategoriesSettings(){
       let included = [];
       let excluded = [];
@@ -84,52 +104,75 @@
         excluded.push($(includedCategory).attr('catid'));
 
       });
+
       $('#include-categories').val(included);
       $('#exclude-categories').val(excluded);
 
     }
+   //_________________END checkCategoriesSettings_______________________________
 
-
-   //_______________________________________________________
-
-   //function to add category to list of choosen categories
+   /**
+    * add category to list of choosen categories
+    * @param {[object]} currentItem - event.target of clicked list item
+    * @param {[string html]} catItemToInsert html of category to add to selected list
+    * @param {[string]} categoryToAddId Id of clicked category item
+    */
    function addCategoryToList(currentItem,catItemToInsert,categoryToAddId){
 
-     if(!$('.seg-categories span[catid='+$(catItemToInsert).attr("catid")+']').length)
+     if(!$('.seg-categories span[catid='+categoryToAddId+']').length)
         {
           $(currentItem).closest('.cat-tree').prev().append(catItemToInsert);
            addRemoveToFromDisabledList(categoryToAddId);
         }
 
    }
-   //function to remove category from list of choosen categories
-   //
+
+   /**
+    * remove category from list of choosen categories
+    * @param  {[object]} cat DOM object to be removed from selected list
+    * @return viod
+    */
     function removeCategoryFromList(cat){
       $(cat).remove();
     }
-   //
-   // function disable category when choosen
-     function addRemoveToFromDisabledList(id){
-       if (selectedCategories.includes(id)) {
+
+   /**
+    * toggle caftegory id to/from  list of selected categories
+    * @param {[string]} id - id of category to add/remove from selected categories
+    */
+     function addRemoveToFromDisabledList(id)
+        {
+          if (selectedCategories.includes(id))
+            {
               const index = selectedCategories.indexOf(id);
               selectedCategories.splice(index,1);
-       }else{ selectedCategories.push(id)}
+
+            }else{ selectedCategories.push(id)}
      }
-     //function to add class disabled to selected categoties in categoryTree
+
+     /**
+      * checks the selectedCategories array and add disabled class to categoryTree
+      * @return void
+      */
      function checkDisabledList(){
        $.each(selectedCategories,(i,id)=>{
 				$('li#'+id+'').addClass('disabled').removeClass('pointer');
 			});
      }
 
-   //returns html of single category in category tree
+   /**
+    * Generates category Html from goven id and name
+    * @param  {[string]} id   [id of category]
+    * @param  {[string]} name [name of category]
+    * @return {[string]}      HTML of category
+    */
 		function getCategoryItemHTML(id, name ){
 			const html = '<span id="includedCat" catId="'+id+'" class=" pointer" >'+name+'</span>';
 			return html;
 		}
     /**
-     * [generateExcerpts description]
-     * @return {[type]} [description]
+     * start the process of generating excerpts with the settings
+     * @return void
      */
     function generateExcerpts(){
 
@@ -138,7 +181,6 @@
 
       if (validation.pass)
         {
-
           const data = {
 			                  'action'  : 'seg_count_posts_to_process',
 			                  'type'    : settings.type,
@@ -162,8 +204,15 @@
                                         </button>
                                       </div>`;
                 //if query returns posts count > 0 show count and proceed button
-                if(!$('#proceed').length) $(".generate-button-container").after(proceedButton);
-                $('button#proceed-btn').on('click',()=>proceedCreateExcerpts(data,postsNumber));
+                if(!$('#proceed').length)
+                  {
+                    $(".generate-button-container").after(proceedButton);
+                  }
+
+                $('button#proceed-btn').on(
+                                           'click',
+                                           () => {proceedCreateExcerpts(data,postsNumber)}
+                                         );
               }else{
                     const messages = [];
                     messages.push('No posts matched your settings: ' + response);
@@ -176,69 +225,89 @@
         }
 }
       //
-      //
-      function proceedCreateExcerpts(data,postsNumber){
-
-        const postsPerIteration = 5;
-        const iterationQuantity = Math.ceil(postsNumber/postsPerIteration);
-        let iterationOffset = 0;
-        data['action'] = 'seg_generate_excerpts';
-        data['perPage'] = postsPerIteration;
-        let guid = 0;
-
-        if($('#proceed'))
+      /**
+       * Proceeds the create excerpt process, generate excerpts by 20 at once by sending ajax requests one by one
+       * @param  {[object]} data        [data for ajax requst]
+       * @param  {[number]} postsNumber [numbet of posts that will be affected]
+       * @return void
+       */
+      function proceedCreateExcerpts(data,postsNumber)
         {
-          $('#proceed-btn').off();
-          $('#proceed').remove();
-        };
-        let progressSteps = '';
-        const width = ((1/(iterationQuantity+1)) * 100).toFixed(3);
-        for (i=0; i< iterationQuantity;i++)
-          {
-            progressSteps +=`<div id = "step${i+1}" class="progress-step" style="width:${width}%;"></div>`;
-          }
-        progressBar = `<div id="proceed">
-                          <div id="progressBar">
-                            ${progressSteps}
-                          </div>
-                       </div>`;
-        $(".generate-button-container").after(progressBar);
-          function run(data) {
-            data['offset'] = guid  * postsPerIteration;
-            guid++;
-            const id = guid;
 
-            return new Promise(resolve => {
+            const postsPerIteration = 20;
+            const iterationQuantity = Math.ceil(postsNumber/postsPerIteration);
+            let iterationOffset     = 0;
+            data['action']          = 'seg_generate_excerpts';
+            data['perPage']         = postsPerIteration;
+            let guid                = 0;
+            let progressSteps       = '';
+            const width             = ((1/(iterationQuantity+1)) * 100).toFixed(3);
 
-              $.post(ajaxurl, data, function(response)
-                          {
+            if($('#proceed'))
+              {
+                $('#proceed-btn').off();
+                $('#proceed').remove();
+              }
 
+            for (i=0; i< iterationQuantity;i++)
+              {
+                progressSteps +=`<div id = "step${i+1}" class="progress-step" style="width:${width}%;"></div>`;
+              }
+            progressBar = `<div id="proceed">
+                              <div id="progressBar">
+                                ${progressSteps}
+                              </div>
+                           </div>`;
+            $(".generate-button-container").after(progressBar);
+            /**
+             * Helper function to make ajax requests and update progress bar
+             * @param  {[object]} data for ajax request
+             * @return {[viod]}
+             */
+            function runAjaxRequest(data)
+              {
+                data['offset'] = guid  * postsPerIteration;
+                guid++;
+                const id = guid;
+
+                return new Promise(resolve =>
+                  {
+
+                    $.post(ajaxurl, data, function(response)
+                        {
                           $(`#step${id}`).addClass('stepReady');
-                           resolve(id);
-                           iterationOffset+=id;
-                           });
-            });
-          }
+                          resolve(id);
+                          iterationOffset+=id;
+                        });
+                  });
+              }
 
-        const promise = Array.from({ length: iterationQuantity   }).reduce(function (acc) {
-          return acc.then(function (res) {
-            return run(data).then(function (result) {
-              res.push(result);
-              return res;
-            });
-          });
-        }, Promise.resolve([]));
+            const promise = Array.from({ length: iterationQuantity   })
+                            .reduce(
+                              function (acc)
+                                {
+                                  return acc.then(
+                                    function (res)
+                                      {
+                                        return runAjaxRequest(data)
+                                      });
+                                }, Promise.resolve([]));
 
-        promise.then(()=>{
-          const messages = ['Excerpts have been successfully generated!']
-          showMessages(messages,'success');
-        }
-        ).catch(error=>{console.log(error)});
+            promise.then(()=>{
+              const messages = ['Excerpts have been successfully generated!']
+              showMessages(messages,'success');
+            }
+            ).catch(error=>{console.log(error)});
 
       }
+//_________________END proceedCreateExcerpts___________________________________
 
-      //
-      //
+      /**
+       * Inserts block of messages
+       * @param  {[array]} messages [array of massages to show]
+       * @param  {[string]} status   [css class to add to message box (danger,warning,success)]
+       * @return void
+       */
       function showMessages(messages,status){
         let messages_html = `<div id="proceed" class="${status}" ><ul class="messages">`;
         $(messages).each((i,message)=>{
@@ -253,7 +322,10 @@
                   $(".generate-button-container").after(messages_html);
                 }
       }
-    //
+    /**
+     * Collect all the user settings
+     * @return {[object]} [each setting as a property]
+     */
     function getSettings(){
       let settings ={};
       settings['type']     = $('#post-type-select').val();
@@ -263,8 +335,12 @@
       settings['words']    = $('#excerpt-words').val();
       return settings;
     }
-    //
-    //Validation
+
+    /**
+     * validate the settings according to the rules
+     * @param  {[object]} settings [colected settings from user input]
+     * @return {[object]}          [contains two properties: pass(boolean), warnings(array)]
+     */
       function validateSettings(settings){
         let approved = [];
         let warnings  = [];
@@ -302,39 +378,42 @@
 
         return prsponse = {pass, warnings};
       }
-    // _______________________________________________________
-    //
-   /* function to show category tree as a list of options
-		returns children (html)
-		@params
-		categories  (json)
 
-		 */
-		function categoryTree(categories){
-			const catlist = $.parseJSON(categories);
-			if(catlist !== undefined){
+   /**
+    * Create category tree from existing categories
+    * @param  {[string]} categories [json of all categories]
+    * @return {[string]}            [Html of the category Tree]
+    */
+		function categoryTree(categories)
+      {
+			     const catlist = $.parseJSON(categories);
 
-				const parentCategoriesArray = {};
-				const childCategoriesArray 	= [];
-				let currCat={};
-				$.each(catlist, (index,cat)=>{
+			     if(catlist !== undefined)
+            {
+				      const parentCategoriesArray = {};
+				      const childCategoriesArray 	= [];
+				      let currCat={};
+              //devide categories in two arrays, top level and children
+				      $.each(catlist, (index,cat)=>
+                {
+						      currCat[cat.cat_ID] = cat.cat_name;
 
-						currCat[cat.cat_ID] = cat.cat_name;
-					if (cat.category_parent === 0)
-					{
-						parentCategoriesArray[cat.cat_ID] = cat.cat_name;
-					}else{
-								if(childCategoriesArray[cat.category_parent] === undefined)
-									{
-										childCategoriesArray[cat.category_parent]=[];
-									}
+					        if (cat.category_parent === 0)
+					           {
+						           parentCategoriesArray[cat.cat_ID] = cat.cat_name;
+					           }else{
+								           if(childCategoriesArray[cat.category_parent] === undefined)
+									           {
+										           childCategoriesArray[cat.category_parent]=[];
+									           }
 
-									childCategoriesArray[cat.category_parent].push(currCat);
-					}
-					currCat={};
-				});
-
+									         childCategoriesArray[cat.category_parent].push(currCat);
+					                }
+					         currCat={};
+				        });
+        //Prepare Html category tree
 				let categoryHierarchyList = '<div id="cat-source"><ul>';
+
 				$.each(parentCategoriesArray, (id,name)=>{
 					categoryHierarchyList +='<li id="' + id + '" class="cat-item pointer"  >'
 					+ name
@@ -345,13 +424,15 @@
 				categoryHierarchyList += '</ul></div>';
 				return categoryHierarchyList;
 
-				/* function to check if category has children
-				returns children (html)
-				@params
-				parent id (num)
-				depth indicator(string)
-				 */
+				/**
+         * check if category has children and return children (html)
+         * @param  {[string]} id                   [id of category to check]
+         * @param  {[array]} childCategoriesArray [array mapped categories to its parents]
+         * @param  {[string]} depth                [string characters for visual separation of child elements]
+         * @return {[string]}                      [Html of child category tree]
+         */
 				function checkChildren(id,childCategoriesArray,depth){
+
 					if(childCategoriesArray[id] !== undefined)
 						{
 							depth+=' - ';
@@ -375,9 +456,7 @@
 					return '';
 				}
 			}
-
 			return '';
 		}
-
   }
   ));

@@ -1,7 +1,7 @@
 <?php
 /*
 Plugin Name: Simple Excerpt Generator
-Plugin URI:
+Plugin URI: https://github.com/Serhii-Kozik/simple-excerpt-generator
 Description:  Plugin generates excerpts for the existing posts based on post content and plugin presets.
 Version:      1.0
 Author:       Serhii Kozik
@@ -28,10 +28,11 @@ function simple_excerpt_generator_admin_page()
 add_action('admin_menu', 'simple_excerpt_generator_admin_page');
 
 //manage ajax request
-//
+
 add_action( 'wp_ajax_seg_generate_excerpts', 'seg_generate_excerpts_handler' );
 
-function seg_generate_excerpts_handler() {
+  function seg_generate_excerpts_handler()
+    {
 
       $suffix = esc_attr($_POST['suffix']);
       $excerptLength = esc_attr($_POST['words']);
@@ -61,15 +62,14 @@ function seg_generate_excerpts_handler() {
             wp_update_post( $postToUpdate );
           }
 
-	wp_die(); // this is required to terminate immediately and return a proper response
-}
+	    wp_die(); // this is required to terminate immediately and return a proper response
+  }
 
 //count number of postst to process accorfing the Settings
 add_action( 'wp_ajax_seg_count_posts_to_process', 'seg_count_posts_to_process_handler' );
 
-function seg_count_posts_to_process_handler() {
-  //global $wpdb; // this is how you get access to the database
-
+function seg_count_posts_to_process_handler()
+  {
       $args = array(
                       'post_type'        => esc_attr($_POST['type']),
                       'category__not_in' => explode(',', esc_attr($_POST['excluded'])),
@@ -84,6 +84,6 @@ function seg_count_posts_to_process_handler() {
 
       echo $total_posts->post_count;
 
-  wp_die(); // this is required to terminate immediately and return a proper response
-}
+      wp_die(); // this is required to terminate immediately and return a proper response
+ }
 ?>
