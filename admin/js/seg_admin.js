@@ -64,7 +64,7 @@
             });
 
        //settings change Event listener
-        $('.setting').on('change',()=>checkCategoriesSettings());
+        $('.setting').on('change',()=>{checkCategoriesSettings()});
 
    });
 //_____________________END of DOM ready function__________________________________
@@ -131,7 +131,7 @@
     function removeCategoryFromList(cat){
       $(cat).remove();
       if ($('#cat-source').length)
-        { 
+        {
           $('#cat-source li#'+$(cat).attr('catid')+'')
           .addClass('pointer')
           .removeClass('disabled');
@@ -186,6 +186,7 @@
           const data = {
 			                  'action'  : 'seg_count_posts_to_process',
 			                  'type'    : settings.type,
+                        'existed' : settings.existed,//boolean
                         'included': settings.included,
                         'excluded': settings.excluded,
                         'suffix'   : settings.suffix,
@@ -196,10 +197,10 @@
                 const postsNumber = parseInt(response,10);
             if (postsNumber > 0)
               {
-
+                const existedSettingText = settings.existed ? 'But existed excerpts will not be changed':'';
                 const proceedButton = `<div id="proceed">
                                         <label class="proceed-lbl" for="proceed-btn" >
-                                          Current settings will generate <strong> ${response} </strong> excerpts
+                                          Current settings will affect <strong> ${response} </strong> posts. ${existedSettingText}
                                         </label>
                                         <button type="button" id="proceed-btn" class="seg-proceed">
                                           Proceed
@@ -282,10 +283,10 @@
 
                 return new Promise(resolve =>
                   {
-                    $.post(ajaxurl, data, function()
-                        {
+                    $.post(ajaxurl, data, function(respons)
+                        { console.log('resp',respons);
                           $(`#step${id}`).addClass('stepReady');
-                          resolve(id);
+                          resolve(respons);
                         });
                   });
               }
@@ -295,14 +296,20 @@
                               function (acc)
                                 {
                                   return acc.then(
-                                    function ()
+                                    function (changed)
                                       {
-                                        return runAjaxRequest(data)
+                                        return runAjaxRequest(data).then(function(response){
+                                          changed.push(parseInt(response,10));
+                                          return changed;
+                                        })
                                       });
                                 }, Promise.resolve([]));
 
-            promise.then(()=>{
-              const messages = ['Excerpts have been successfully generated!']
+            promise.then((changed)=>{
+
+              const excerptsCreated = changed.reduce((a, b) => a + b, 0);
+              const messages = [ excerptsCreated +' Excerpts have been successfully generated!']
+
               showMessages(messages,'success');
             }
             ).catch(error=>{console.log(error)});
@@ -337,9 +344,10 @@
     function getSettings(){
       let settings ={};
       settings['type']     = $('#post-type-select').val();
+      settings['existed']  = $('#leave-existed-posts').is(':checked');
       settings['included'] = $('#include-categories').val() !=='' ? $('#include-categories').val() : null;
       settings['excluded'] = $('#exclude-categories').val() !=='' ? $('#exclude-categories').val() : null;
-      settings['suffix']    = $('#excerpt-suffix').val()!=='' ? $('#excerpt-suffix').val() : null;
+      settings['suffix']   = $('#excerpt-suffix').val()!=='' ? $('#excerpt-suffix').val() : null;
       settings['words']    = $('#excerpt-words').val();
       return settings;
     }
@@ -357,6 +365,8 @@
         wordsPattern = /^[0-9]*$/;
 
         approved.push(suffixPattern.test(settings.type));
+
+        approved.push(typeof settings.existed === 'boolean');
 
         if( settings.included !== null && !catpattern.test(settings.included))
             {

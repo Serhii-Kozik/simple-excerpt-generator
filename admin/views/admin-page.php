@@ -33,6 +33,13 @@ wp_enqueue_script('seg-admin-script',plugins_url() . '/simple-excerpt-generator/
        </select >
   </div>
 
+<div class="existed-settings">
+  <label for="leave-existed-posts">
+    <?php echo esc_html_e('Do not change existed excerpts')?>
+  </label>
+  <input id ="leave-existed-posts" type="checkbox" name="leave-existed-posts"  class="setting"/>
+</div>
+
 <h3><?php echo esc_html_e('Include categories')?></h3>
   <div class="include-categoty-settings seg-categories"></div>
   <div class="seg-include cat-tree"></div>

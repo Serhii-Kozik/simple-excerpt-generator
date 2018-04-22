@@ -33,7 +33,7 @@ add_action( 'wp_ajax_seg_generate_excerpts', 'seg_generate_excerpts_handler' );
 
   function seg_generate_excerpts_handler()
     {
-
+      $changed = 0;
       $suffix = esc_attr($_POST['suffix']);
       $excerptLength = esc_attr($_POST['words']);
 
@@ -52,17 +52,25 @@ add_action( 'wp_ajax_seg_generate_excerpts', 'seg_generate_excerpts_handler' );
 
       foreach ($posts_query->posts as $post)
           {
-            $excerpt = wp_trim_words( strip_shortcodes($post->post_content ), intval($excerptLength,10), $suffix );
+            if ($_POST['existed'] === 'true' && has_excerpt( $post->ID ))
+              {
 
-            $postToUpdate = array(
-                                  'ID'           => $post->ID,
-                                  'post_excerpt' => $excerpt,
-                                );
-            // Update the post into the database
-            wp_update_post( $postToUpdate );
+              }else{
+                    $excerpt = wp_trim_words( strip_shortcodes($post->post_content ), intval($excerptLength,10), $suffix );
+
+                    $postToUpdate = array(
+                                          'ID'           => $post->ID,
+                                          'post_excerpt' => $excerpt,
+                                        );
+                    // Update the post into the database
+                    wp_update_post( $postToUpdate );
+                    $changed = $changed + 1;
+                  }
           }
 
+          echo json_encode($changed);
 	    wp_die(); // this is required to terminate immediately and return a proper response
+      die();
   }
 
 //count number of postst to process accorfing the Settings
@@ -82,7 +90,7 @@ function seg_count_posts_to_process_handler()
 
       $total_posts = new WP_Query( $args );
 
-      echo $total_posts->post_count;
+      echo $total_posts->found_posts;
 
       wp_die(); // this is required to terminate immediately and return a proper response
  }

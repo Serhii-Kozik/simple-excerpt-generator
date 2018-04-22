@@ -37,6 +37,9 @@ ul li.disabled,ul li.disabled:hover{
   position:absolute;
   top:0;
 }
+.existed-settings{
+  margin: 20px 0;
+}
 #post-type-select{width:200px;}
 li.cat-item {
   padding: 0 16px;
