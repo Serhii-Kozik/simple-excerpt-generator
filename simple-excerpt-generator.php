@@ -11,6 +11,8 @@ License URI:  https://www.gnu.org/licenses/gpl-3.0.html
 Text Domain:  simple_excerpt_gen
 Domain Path:  /languages
 */
+//Sequrity check
+defined( 'ABSPATH' ) or die( 'No script kiddies please!' );
 
 
 function simple_excerpt_generator_admin_page()
@@ -33,6 +35,7 @@ add_action( 'wp_ajax_seg_generate_excerpts', 'seg_generate_excerpts_handler' );
 
   function seg_generate_excerpts_handler()
     {
+      check_ajax_referer( 'easy_excerpt_generator_security', 'security' );
       $changed = 0;
       $suffix = esc_attr($_POST['suffix']);
       $excerptLength = esc_attr($_POST['words']);
@@ -78,6 +81,7 @@ add_action( 'wp_ajax_seg_count_posts_to_process', 'seg_count_posts_to_process_ha
 
 function seg_count_posts_to_process_handler()
   {
+    check_ajax_referer( 'easy_excerpt_generator_security', 'security' );
       $args = array(
                       'post_type'        => esc_attr($_POST['type']),
                       'category__not_in' => explode(',', esc_attr($_POST['excluded'])),
@@ -94,4 +98,5 @@ function seg_count_posts_to_process_handler()
 
       wp_die(); // this is required to terminate immediately and return a proper response
  }
+
 ?>

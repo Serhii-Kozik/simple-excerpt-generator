@@ -1,6 +1,7 @@
 <?php
+if ( ! defined( 'ABSPATH' ) ) exit;
+if (current_user_can('edit_others_posts')) {
 //enqueue styles and scripts
-
 wp_enqueue_style( 'seg-admin-page', plugins_url() . '/simple-excerpt-generator/admin/css/seg_admin.css');
 
 wp_enqueue_script('seg-admin-script',plugins_url() . '/simple-excerpt-generator/admin/js/seg_admin.js',array('jquery'));
@@ -8,11 +9,12 @@ wp_enqueue_script('seg-admin-script',plugins_url() . '/simple-excerpt-generator/
 // collecting data for presets
   $post_types = get_post_types(array('public'=>true));
   $avalable_categories = json_encode(get_categories());
+  $wp_nonce = wp_create_nonce('easy_excerpt_generator_security');
+  wp_localize_script('seg-admin-script', 'categories', $avalable_categories);
+  wp_localize_script('seg-admin-script', 'seg_security_token', $wp_nonce);
 //declare availeble categories in script
 ?>
-  <script>
-    categories  = '<?php echo $avalable_categories; ?>';
-  </script>
+
 <!-- admin page layout -->
 <div class="simple-excerpt-gen-container">
 
@@ -70,3 +72,8 @@ wp_enqueue_script('seg-admin-script',plugins_url() . '/simple-excerpt-generator/
 <input id="include-categories"  type="hidden" value="" />
 <input id="exclude-categories"  type="hidden" value="" />
 </div>
+<?php
+}
+else{
+      echo esc_html('You have no permition to edit others posts!');
+    }

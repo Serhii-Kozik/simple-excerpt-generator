@@ -189,8 +189,9 @@
                         'existed' : settings.existed,//boolean
                         'included': settings.included,
                         'excluded': settings.excluded,
-                        'suffix'   : settings.suffix,
-                        'words'   : settings.words
+                        'suffix'  : settings.suffix,
+                        'words'   : settings.words,
+                        'security': seg_security_token
 		                    };
           //check query settings and count results if any
           $.post(ajaxurl, data, function(response) {
@@ -284,7 +285,7 @@
                 return new Promise(resolve =>
                   {
                     $.post(ajaxurl, data, function(respons)
-                        { console.log('resp',respons);
+                        {
                           $(`#step${id}`).addClass('stepReady');
                           resolve(respons);
                         });
