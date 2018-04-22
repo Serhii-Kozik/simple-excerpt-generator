@@ -1,4 +1,4 @@
-# simple-excerpt-generator # wordpress # plugin # excerpt
+# simple-excerpt-generator 
 Simple Wordpress plugin, allows to generate excerpts for existing posts based on post content and plugin presets.
 Generated excerpts will be saved in database in post_excerpt field.
 
