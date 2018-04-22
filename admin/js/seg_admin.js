@@ -9,9 +9,6 @@
    // Listen for the jQuery ready event on the document
    $(function() {
      // The DOM is ready!
-     // get categoty tree layout
-     //"categories" is variaple passet from php
-        const available_categories = categoryTree(categories);
         // show category tree when click on category box
         $('.seg-categories').on('click', (event)=>{
           //exclude click on category item inside the box
@@ -21,10 +18,10 @@
               ?
                 $('#cat-source').off().remove()
               :
-                $(event.target).next().append(available_categories);
+                $(event.target).next().append(categoryTree(categories));
 
             checkDisabledList();
-            //event listener for ckick on category in list (to add category to selected)
+            //event listener for ckick on category in categiry tree (to add category to selected list)
             $('#cat-source').on("click", "li" , (event)=>{
                 addCategoryToList(
                                   event.target,
@@ -117,14 +114,13 @@
     * @param {[string html]} catItemToInsert html of category to add to selected list
     * @param {[string]} categoryToAddId Id of clicked category item
     */
-   function addCategoryToList(currentItem,catItemToInsert,categoryToAddId){
-
-     if(!$('.seg-categories span[catid='+categoryToAddId+']').length)
+   function addCategoryToList(currentItem,catItemToInsert,categoryToAddId)
+    {
+      if(!$('.seg-categories span[catid='+categoryToAddId+']').length)
         {
           $(currentItem).closest('.cat-tree').prev().append(catItemToInsert);
            addRemoveToFromDisabledList(categoryToAddId);
         }
-
    }
 
    /**
@@ -134,6 +130,12 @@
     */
     function removeCategoryFromList(cat){
       $(cat).remove();
+      if ($('#cat-source').length)
+        { 
+          $('#cat-source li#'+$(cat).attr('catid')+'')
+          .addClass('pointer')
+          .removeClass('disabled');
+        }
     }
 
    /**
@@ -224,7 +226,27 @@
           showMessages(validation.warnings,'danger');
         }
 }
-      //
+
+
+    /**
+     * build progress bar layout depend on iterations count
+     * @param  {[number]} iterationQuantity [number of iterations in progress]
+     * @return {[string]}                   [Html of progress Bar]
+     */
+      function progressBar(iterationQuantity){
+        let progressSteps       = '';
+        const width             = ((1/(iterationQuantity)) * 100).toFixed(3);
+        for (i=0; i< iterationQuantity;i++)
+          {
+            progressSteps +=`<div id = "step${i+1}" class="progress-step" style="width:${width}%;"></div>`;
+          }
+        progressBarElement = `<div id="proceed">
+                          <div id="progressBar">
+                            ${progressSteps}
+                          </div>
+                       </div>`;
+        return progressBarElement;
+      }
       /**
        * Proceeds the create excerpt process, generate excerpts by 20 at once by sending ajax requests one by one
        * @param  {[object]} data        [data for ajax requst]
@@ -236,29 +258,17 @@
 
             const postsPerIteration = 20;
             const iterationQuantity = Math.ceil(postsNumber/postsPerIteration);
-            let iterationOffset     = 0;
             data['action']          = 'seg_generate_excerpts';
             data['perPage']         = postsPerIteration;
             let guid                = 0;
-            let progressSteps       = '';
-            const width             = ((1/(iterationQuantity+1)) * 100).toFixed(3);
 
             if($('#proceed'))
               {
                 $('#proceed-btn').off();
                 $('#proceed').remove();
               }
-
-            for (i=0; i< iterationQuantity;i++)
-              {
-                progressSteps +=`<div id = "step${i+1}" class="progress-step" style="width:${width}%;"></div>`;
-              }
-            progressBar = `<div id="proceed">
-                              <div id="progressBar">
-                                ${progressSteps}
-                              </div>
-                           </div>`;
-            $(".generate-button-container").after(progressBar);
+            //show progress bar
+            $(".generate-button-container").after(progressBar(iterationQuantity));
             /**
              * Helper function to make ajax requests and update progress bar
              * @param  {[object]} data for ajax request
@@ -272,12 +282,10 @@
 
                 return new Promise(resolve =>
                   {
-
-                    $.post(ajaxurl, data, function(response)
+                    $.post(ajaxurl, data, function()
                         {
                           $(`#step${id}`).addClass('stepReady');
                           resolve(id);
-                          iterationOffset+=id;
                         });
                   });
               }
@@ -287,7 +295,7 @@
                               function (acc)
                                 {
                                   return acc.then(
-                                    function (res)
+                                    function ()
                                       {
                                         return runAjaxRequest(data)
                                       });
@@ -423,40 +431,40 @@
 				});
 				categoryHierarchyList += '</ul></div>';
 				return categoryHierarchyList;
-
-				/**
-         * check if category has children and return children (html)
-         * @param  {[string]} id                   [id of category to check]
-         * @param  {[array]} childCategoriesArray [array mapped categories to its parents]
-         * @param  {[string]} depth                [string characters for visual separation of child elements]
-         * @return {[string]}                      [Html of child category tree]
-         */
-				function checkChildren(id,childCategoriesArray,depth){
-
-					if(childCategoriesArray[id] !== undefined)
-						{
-							depth+=' - ';
-							let html='';
-							$.each(childCategoriesArray[id], (i, child)=>{
-
-								html+='<li id="'+Object.keys(child)[0]
-								+
-								'" class="cat-item pointer" >'
-								+
-								depth
-								+
-								child[Object.keys(child)[0]]
-								+ '</li>'
-								+
-								checkChildren(Object.keys(child)[0],childCategoriesArray,depth)
-								+ '';
-							});
-							return html;
-						}
-					return '';
-				}
 			}
 			return '';
 		}
+
+    /**
+     * check if category has children and return children (html)
+     * @param  {[string]} id                   [id of category to check]
+     * @param  {[array]} childCategoriesArray [array mapped categories to its parents]
+     * @param  {[string]} depth                [string characters for visual separation of child elements]
+     * @return {[string]}                      [Html of child category tree]
+     */
+    function checkChildren(id,childCategoriesArray,depth){
+
+      if(childCategoriesArray[id] !== undefined)
+        {
+          depth+=' - ';
+          let html='';
+          $.each(childCategoriesArray[id], (i, child)=>{
+
+            html+='<li id="'+Object.keys(child)[0]
+            +
+            '" class="cat-item pointer" >'
+            +
+            depth
+            +
+            child[Object.keys(child)[0]]
+            + '</li>'
+            +
+            checkChildren(Object.keys(child)[0],childCategoriesArray,depth)
+            + '';
+          });
+          return html;
+        }
+      return '';
+    }
   }
   ));

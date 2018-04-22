@@ -45,8 +45,9 @@ wp_enqueue_script('seg-admin-script',plugins_url() . '/simple-excerpt-generator/
 
 <div class="seg-view-setting" >
   <div class="seg-view-item left-column">
-    <label for="excerpt-suffix"><?php echo esc_html_e('Excerpt suffix')?></label>
+    <label for="excerpt-suffix"><?php echo esc_html_e('Excerpt suffix ')?></label>
     <input type="text" id="excerpt-suffix" class="setting" name="" value="" />
+    <label><?php echo esc_html_e('allowed (a-z  0-9 space , . > -) ')?></label>
   </div>
 
   <div class="seg-view-item rigth-column">
