@@ -14,8 +14,8 @@ Plugin does not create any options or database records for its functionality, an
     <li><strong>Number of words in an excerpt</strong> - required, excerpt will contain chosen number of words</li>
     
 <h3>How it works</h3>
-    The plugin gets user settings and checks if there is posts corresponding to the request settings. 
-    If requested posts quantity > 0 the plugin shows posts quantity to be affected and asks user to proceed permission.
-    If user chooses to proceed, the plugin generates excerpts by 20 at once by sending ajax requests one by one.
+   The plugin gets user settings and checks if there are posts corresponding to the request settings. 
+    If requested posts quantity > 0 the plugin shows posts quantity to be affected and asks user permission to proceed.
+    If the user chooses to proceed, the plugin generates excerpts by 20 at once by sending ajax requests one by one.
     The progress bar shows the current stage of generating process. 
     
