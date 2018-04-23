@@ -14,7 +14,14 @@ Domain Path:  /languages
 //Sequrity check
 defined( 'ABSPATH' ) or die( 'No script kiddies please!' );
 
+//enqueue styles and scripts
+function seg_admin_enqueue()
+  {
+    wp_enqueue_style( 'seg-admin-page', plugins_url('admin/css/seg_admin.css', __FILE__));
 
+    wp_register_script('seg-admin-script',plugins_url( 'admin/js/seg_admin.js', __FILE__ ) ,array('jquery'));
+  }
+add_action('admin_enqueue_scripts', 'seg_admin_enqueue');
 function simple_excerpt_generator_admin_page()
 {
     add_menu_page(

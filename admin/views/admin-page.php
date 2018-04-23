@@ -1,11 +1,7 @@
 <?php
 if ( ! defined( 'ABSPATH' ) ) exit;
 if (current_user_can('edit_others_posts')) {
-//enqueue styles and scripts
-wp_enqueue_style( 'seg-admin-page', plugins_url() . '/simple-excerpt-generator/admin/css/seg_admin.css');
-
-wp_enqueue_script('seg-admin-script',plugins_url() . '/simple-excerpt-generator/admin/js/seg_admin.js',array('jquery'));
-
+wp_enqueue_script('seg-admin-script');
 // collecting data for presets
   $post_types = get_post_types(array('public'=>true));
   $avalable_categories = json_encode(get_categories());
